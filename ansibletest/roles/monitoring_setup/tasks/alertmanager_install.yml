@@ -1,0 +1,67 @@
+---
+- name: Create user for Alertmanager
+  user:
+    name: "{{ alertmgr_user }}"
+    system: yes
+    shell: /usr/sbin/nologin
+    createhome: no
+
+- name: Creating Alertmanager Data directories
+  file:
+    path: "{{ alertmgr_data_dir }}"
+    owner: "{{ alertmgr_user }}"
+    group: "{{ alertmgr_user }}"
+    state: directory
+    mode: "0755"
+
+- name: Creating Alertmanager configuration directories
+  file:
+    path: "{{ item }}"
+    owner: "{{ alertmgr_user }}"
+    group: "{{ alertmgr_user }}"
+    state: directory
+    mode: "0750"
+  with_items:
+    - "{{ alertmgr_conf_dir }}"
+    - "{{ alertmgr_conf_dir }}/rules"
+    - "{{ alertmgr_conf_dir }}/templates"
+
+- name: Download Alertmanager binary
+  get_url:
+    url: "https://github.com/prometheus/alertmanager/releases/download/v{{ alertmanager_version }}/alertmanager-{{ alertmanager_version }}.linux-{{ go_arch }}.tar.gz"
+    dest: "/tmp/alertmanager-{{ alertmanager_version }}.linux-{{ go_arch }}.tar.gz"
+
+- name: Extract Alertmanager binary
+  unarchive:
+    src: "/tmp/alertmanager-{{ alertmanager_version }}.linux-{{ go_arch }}.tar.gz"
+    dest: "{{ alertmanager_install_dir }}"
+    remote_src: yes
+    creates: "{{ alertmanager_install_dir }}/alertmanager-{{ alertmanager_version }}"
+
+- name: Rename Alertmanager binary
+  file:
+    src: "{{ alertmanager_install_dir }}/alertmanager-{{ alertmanager_version }}/alertmanager"
+    dest: "{{ alertmanager_install_dir }}/alertmanager"
+    state: link
+    force: yes
+
+- name: Create Alertmanager configuration directory
+  file:
+    path: "/etc/alertmanager/"
+    state: directory
+
+- name: Copy Alertmanager configuration file
+  copy:
+    src: "{{ alertmanager_config_src }}"
+    dest: "{{ alertmanager_config_dest }}"
+
+- name: Create Alertmanager service file
+  template:
+    src: ./templates/alertmanager.service.j2
+    dest: "{{ alertmanager_service_dest }}"
+  notify:
+    - Reload systemd 
+    - Start alertmanager_service
+
+                                           
+

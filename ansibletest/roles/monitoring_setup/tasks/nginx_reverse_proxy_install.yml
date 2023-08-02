@@ -1,0 +1,50 @@
+---
+- name: Install Nginx on the server
+  package:
+    name: nginx
+    state: present
+
+- name: Create Nginx configuration for Prometheus
+  template:
+    src: prometheus.conf.j2
+    dest: /etc/nginx/sites-available/prometheus
+  notify: Reload Nginx
+
+- name: Create Nginx configuration for Grafana
+  template:
+    src: grafana.conf.j2
+    dest: /etc/nginx/sites-available/grafana
+  notify: Reload Nginx
+
+- name: Create Nginx configuration for Alertmanager
+  template:
+    src: alertmanager.conf.j2
+    dest: /etc/nginx/sites-available/alertmanager
+  notify: Reload Nginx
+
+- name: Enable Nginx configurations
+  file:
+    src: "/etc/nginx/sites-available/{{ item }}"
+    dest: "/etc/nginx/sites-enabled/{{ item }}"
+    state: link
+  loop:
+    - prometheus
+    - grafana
+    - alertmanager
+
+#- name: Remove default Nginx site
+#  file:
+#    path: /etc/nginx/sites-enabled/default
+#    state: absent
+#  notify: Reload Nginx
+
+- name: Ensure Nginx is running and enabled on boot
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: Reload Nginx
+  service:
+    name: nginx
+    state: reloaded

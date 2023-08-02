@@ -1,0 +1,39 @@
+---
+go_arch: amd64
+prometheus_version: 2.46.0
+prometheus_dependencies: prometheus
+__prometheus_checksum: d2177ea21a6f60046f9510c828d4f8969628cfd35686780b3898917ef9c268b9
+prom_data_dir: /var/lib/prometheus
+prom_conf_dir: /etc/prometheus
+
+
+grafana_version: "10.0.2"  # Replace with the desired Grafana version
+grafana_install_dir: "/usr/local/bin"
+grafana_config_src: "./templates/grafana.ini.j2"  # Adjust the path and content based on your configuration
+grafana_config_dest: "/etc/grafana/grafana.ini"
+grafana_service_src: "./templates/grafana.service.j2"  # Adjust the path and content based on your service file
+grafana_service_dest: "/etc/systemd/system/grafana.service"
+grafana_service_name: "grafana.service"
+
+alertmanager_version: "0.22.2" 
+alert_manager_checksum: 206cf787c01921574ca171220bb9b48b043c3ad6e744017030fed586eb48e04b
+alertmgr_user: alertmanager
+alertmgr_data_dir: /var/lib/alertmanager
+alertmgr_conf_dir: /etc/alertmanager
+alertmanager_install_dir: "/usr/local/bin"
+alertmanager_config_src: "./files/alertmanager.yml"  
+alertmanager_config_dest: "/etc/alertmanager/alertmanager.yml"
+alertmanager_service_src: "./templates/alertmanager.service.j2"  
+alertmanager_service_dest: "/etc/systemd/system/alertmanager.service"
+
+
+
+node_exporter_version: "1.6.1"  # Replace with a specific version if needed
+node_exporter_checksum: ecc41b3b4d53f7b9c16a370419a25a133e48c09dfc49499d63bcc0c5e0cf3d01
+node_exporter_install_dir: "/opt/node_exporter"
+node_exporter_binary: "node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter"
+node_exporter_user: "node_exporter"
+node_exporter_group: "node_exporter"
+
+nginx_config_path: /etc/nginx/nginx.conf
+

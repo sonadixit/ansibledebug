@@ -1,0 +1,63 @@
+---
+
+- name: Restart Prometheus
+  systemd:
+    name: prometheus
+    state: restarted
+    enabled: yes
+
+- name: Restart Grafana
+  systemd:
+    name: grafana-server
+    state: restarted
+    enabled: yes
+
+- name: Restart Alertmanager
+  systemd:
+    name: alertmanager
+    state: restarted
+    enabled: yes
+
+- name: Restart nginx
+  systemd:
+    name: nginx
+    state: restarted
+    enabled: yes
+
+- name: Restart Node Exporter
+  systemd:
+    name: node_exporter
+    state: restarted
+    enabled: yes
+
+
+- name: Reload systemd 
+  systemd:
+    daemon_reload: yes
+
+- name: Start prometheus_service
+  service:
+    name: prometheus
+    state: started
+    enabled: yes
+
+- name: Start grafana_service
+  systemd:
+    name: grafana-server
+    state: started
+    enabled: yes
+
+- name: Start alertmanager_service
+  systemd:
+    name: alertmanager-server
+    state: started
+    enabled: yes
+- name: Start node_exporter_service
+  systemd:
+    name: node_exporter
+    state: started
+    enabled: yes
+- name: Reload Nginx
+  service:
+    name: nginx
+    state: reloaded

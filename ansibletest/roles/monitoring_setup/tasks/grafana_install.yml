@@ -1,0 +1,38 @@
+- name: Create Grafana configuration directory
+  file:
+    path: "/etc/grafana/"
+    state: directory
+    
+- name: Download Grafana binary
+  get_url:
+    url: "https://dl.grafana.com/oss/release/grafana-{{ grafana_version }}.linux-{{ go_arch }}.tar.gz"
+    dest: "/tmp/grafana-{{ grafana_version }}.linux-{{ go_arch }}.tar.gz"
+
+- name: Extract Grafana binary
+  unarchive:
+    src: "/tmp/grafana-{{ grafana_version }}.linux-{{ go_arch }}.tar.gz"
+    dest: "{{ grafana_install_dir }}"
+    remote_src: yes
+    creates: "{{ grafana_install_dir }}/grafana-{{ grafana_version }}"
+
+
+- name: Rename Grafana binary
+  file:
+    src: /opt/grafana/bin/grafana
+    dest: /usr/local/bin/grafana
+    state: link
+    force: yes
+
+
+- name: Copy Grafana configuration file
+  copy:
+    src: "{{ grafana_config_src }}"
+    dest: "{{ grafana_config_dest }}"
+
+- name: Create Grafana service file
+  copy:
+    src: "{{ grafana_service_src }}"
+    dest: "{{ grafana_service_dest }}"
+  notify: 
+    - Reload systemd 
+    - Start grafana_service

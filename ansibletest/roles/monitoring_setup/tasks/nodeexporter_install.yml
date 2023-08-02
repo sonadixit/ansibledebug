@@ -1,0 +1,44 @@
+    - name: Create user and group for Node Exporter
+      user:
+        name: "{{ node_exporter_user }}"
+        state: present
+        system: yes
+        shell: /bin/false
+    
+    - name: Set ownership of Node Exporter directories
+      file:
+        path: "{{ item }}"
+        owner: "{{ node_exporter_user }}"
+        group: "{{ node_exporter_group }}"
+        state: directory
+        recurse: yes
+      with_items:
+        - "{{ node_exporter_install_dir }}"
+        - "/etc/node_exporter"
+        - "/var/lib/node_exporter"  
+
+    - name: Download Node Exporter binary
+      get_url:
+        url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-{{ go_arch }}.tar.gz"
+        dest: "/tmp/node_exporter-{{ node_exporter_version }}.linux-{{ go_arch }}.tar.gz"
+        checksum: "sha256:{{ node_exporter_checksum }}"
+
+    - name: Extract Node Exporter binary
+      unarchive:
+        src: "/tmp/node_exporter-{{ node_exporter_version }}.linux-{{ go_arch }}.tar.gz"
+        dest: "{{ node_exporter_install_dir }}"
+        remote_src: yes
+        owner: "{{ node_exporter_user }}"
+        group: "{{ node_exporter_group }}"
+        creates: "{{ node_exporter_install_dir }}/{{ node_exporter_binary }}"
+
+    - name: Create symlink to Node Exporter binary
+      file:
+        src: "{{ node_exporter_install_dir }}/{{ node_exporter_binary }}"
+        dest: "/usr/local/bin/node_exporter"
+        state: link
+        force: yes
+      notify:
+        - Reload systemd
+        - Start Node Exporter service
+
